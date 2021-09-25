@@ -13,4 +13,14 @@ module ActiveModel
       validates :owner, type: User
     end
   end
+
+  # Add custom validation for User
+
+  class User
+    include ActiveModel::Validations
+    attr_accessor :name, :email
+
+    validates :name, presence: true, length: { maximum: 50 }
+    validates :email, presence: true, email: true
+  end
 end
