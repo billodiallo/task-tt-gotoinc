@@ -56,4 +56,18 @@ module ActiveModel
       validates_with(validator, defaults.merge(_parse_validates_options(options)))
     end
   end
+
+
+  class Person
+    include ActiveModel::Validations
+
+    attr_accessor :name
+
+    validates! :name, presence: true
+  end
+
+  person = Person.new
+  person.name = ''
+  person.valid?
+  
 end
