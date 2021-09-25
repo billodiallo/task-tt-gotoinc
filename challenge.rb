@@ -24,12 +24,36 @@ module ActiveModel
     validates :email, presence: true, email: true
   end
 
-   # Add  custom email validation class and method
-   
+  # Add  custom email validation class and method
+
   class EmailValidator < ActiveModel::EachValidator
     def validate_each(record, attribute, value)
       record.errors.add attribute, (options[:message] || 'is not an email') unless
         /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i.match?(value)
+    end
+  end
+
+  def validates(*attributes)
+    defaults = attributes.extract_options!.dup
+    validations = defaults.slice!(*_validates_default_keys)
+
+    raise ArgumentError, 'You need to supply at least one attribute' if attributes.empty?
+    raise ArgumentError, 'You need to supply at least one validation' if validations.empty?
+
+    defaults[:attributes] = attributes
+
+    validations.each do |key, options|
+      key = "#{key.to_s.camelize}Validator"
+
+      begin
+        validator = key.include?('::') ? key.constantize : const_get(key)
+      rescue NameError
+        raise ArgumentError, "Unknown validator: '#{key}'"
+      end
+
+      next unless options
+
+      validates_with(validator, defaults.merge(_parse_validates_options(options)))
     end
   end
 end
