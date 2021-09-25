@@ -23,4 +23,13 @@ module ActiveModel
     validates :name, presence: true, length: { maximum: 50 }
     validates :email, presence: true, email: true
   end
+
+   # Add  custom email validation class and method
+   
+  class EmailValidator < ActiveModel::EachValidator
+    def validate_each(record, attribute, value)
+      record.errors.add attribute, (options[:message] || 'is not an email') unless
+        /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i.match?(value)
+    end
+  end
 end
