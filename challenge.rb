@@ -2,7 +2,7 @@ module ActiveModel
   module Validations
     module ClassMethods
       validates :username, presence: true
-      validates :name, presence: true, allow_blank: false
+      validates :name, presence: true, allow_blank: true
       validates :age, inclusion: { in: 0..9 }
       validates :age, numericality: true
       validates :username, presence: true
@@ -57,7 +57,6 @@ module ActiveModel
     end
   end
 
-
   class Person
     include ActiveModel::Validations
 
@@ -78,4 +77,24 @@ module ActiveModel
     validates(*(attributes << options))
   end
 
+  private
+
+  # When creating custom validators, it might be useful to be able to specify
+  # additional default keys. This can be done by overwriting this method.
+  def _validates_default_keys
+    %i[if unless on allow_blank allow_nil strict]
+  end
+
+  def _parse_validates_options(options)
+    case options
+    when TrueClass
+      {}
+    when Hash
+      options
+    when Range, Array
+      { in: options }
+    else
+      { with: options }
+    end
+  end
 end
